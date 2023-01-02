@@ -6,6 +6,16 @@ router.get("/", async (req, res) => {
   res.status(200).json("Bodimaji API");
 });
 
+router.get("/collection/", async (req, res) => {
+  try {
+    let collection;
+    collection = await Collection.find();
+    res.status(200).json(collection);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
 router.post("/collection", async (req, res) => {
   const newCollection = new Collection(req.body);
   try {
@@ -31,6 +41,21 @@ router.get("/collection/:id", async (req, res) => {
     let collection;
     collection = await Collection.findById(req.params.id);
     res.status(200).json(collection);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+
+router.put("/collection/:id", async (req, res) => {
+  try {
+    const updatedcollection = await Collection.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: req.body,
+      },
+      { new: true }
+    );
+    res.status(200).json(updatedcollection);
   } catch (err) {
     res.status(500).json(err);
   }
