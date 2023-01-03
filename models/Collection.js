@@ -1,5 +1,26 @@
 const mongoose = require("mongoose");
 
+const reviewsSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  comment: {
+    type: String,
+    required: true,
+  },
+  rating: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    require: true,
+    ref: "User",
+  },
+});
+
 const collectionSchema = new mongoose.Schema(
   {
     name: {
@@ -21,6 +42,17 @@ const collectionSchema = new mongoose.Schema(
     imageUrl: {
       type: String,
       required: false,
+    },
+    reviews: [reviewsSchema],
+    rating: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    numReviews: {
+      type: Number,
+      required: true,
+      default: 0,
     },
   },
   { timestamps: true }

@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
+    default: "buyer",
   },
   image: {
     type: String,
@@ -33,4 +34,6 @@ const userSchema = new mongoose.Schema({
 
 userSchema.plugin(autoIncrement, { inc_field: "userId" });
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
