@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const autoIncrement = require("mongoose-sequence")(mongoose);
 
 const userSchema = new mongoose.Schema({
   fullname: {
@@ -21,7 +20,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    default: "buyer",
+    default: "customer",
   },
   image: {
     type: String,
@@ -31,8 +30,6 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
-userSchema.plugin(autoIncrement, { inc_field: "userId" });
 
 const User = mongoose.model("User", userSchema);
 

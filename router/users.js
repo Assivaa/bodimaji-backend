@@ -1,73 +1,69 @@
-const express = require("express");
-const Users = express.Router();
-const cors = require("cors");
-const bcrypt = require("bcrypt");
+const router = require("express").Router();
+const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken");
-const JWTSECRETKEY = "bodimaji";
 
 const User = require("../models/Users");
-Users.use(cors());
+const Cart = require("../models/Cart");
 
-Users.post("/register", (req, res) => {
-  const userData = {
+//REGISTER
+router.post("/register", async (req, res) => {
+  const newUser = new User({
     fullname: req.body.fullname,
     username: req.body.username,
     email: req.body.email,
     role: req.body.role,
-    password: req.body.password,
-  };
+    password: CryptoJS.AES.encrypt(
+      req.body.password,
+      process.env.PASS_SEC
+    ).toString(),
+  });
 
-  User.findOne({ email: req.body.email })
-    .then((user) => {
-      if (!user) {
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
-          userData.password = hash;
-          User.create(userData)
-            .then((user) => {
-              res.json({ message: `${user.email} registered succesfully` });
-            })
-            .catch((err) => {
-              res.send(err);
-            });
-        });
-      } else {
-        res.status(400).json({ message: `User already exist` });
-      }
-    })
-    .catch((err) => {
-      res.json(err);
-    });
+  try {
+    const savedUser = await newUser.save();
+    await Cart.create({ username: savedUser.username });
+    res.status(201).json(savedUser);
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
-Users.post("/login", (req, res) => {
-  User.findOne({ username: req.body.username })
-    .then((user) => {
-      if (user) {
-        if (bcrypt.compareSync(req.body.password, user.password)) {
-          const token = jwt.sign({ userId: user.userId }, JWTSECRETKEY, {
-            expiresIn: "1 days",
-          });
-          res.json({
-            message: `${user.email} login succesfully`,
-            name: user.name,
-            username: user.username,
-            email: user.email,
-            userId: user.userId,
-            token,
-          });
-        } else {
-          res.status(400).json({ message: "invalid credentials" });
-        }
-      } else {
-        res.status(400).json({ message: "user doesnt exist" });
-      }
-    })
-    .catch((err) => {
-      res.status(400).json({ message: err.message });
-    });
-});
+//LOGIN
 
-Users.put("/profile/edit/:id", async (req, res) => {
+router.post("/login", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      userName: req.body.user_name,
+    });
+
+    !user && res.status(401).json("Wrong User Name");
+
+    const hashedPassword = CryptoJS.AES.decrypt(
+      user.password,
+      process.env.PASS_SEC
+    );
+
+    const originalPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
+
+    const inputPassword = req.body.password;
+
+    originalPassword != inputPassword && res.status(401).json("Wrong Password");
+
+    const accessToken = jwt.sign(
+      {
+        id: user._id,
+        isAdmin: user.isAdmin,
+      },
+      process.env.JWT_SEC,
+      { expiresIn: "3d" }
+    );
+
+    const { password, ...others } = user._doc;
+    res.status(200).json({ ...others, accessToken });
+  } catch (err) {
+    res.status(500).json(err);
+  }
+});
+router.put("/profile/edit/:id", async (req, res) => {
   const { id } = req.params;
   const myquery = { userId: id };
   const updateData = {
@@ -93,7 +89,7 @@ Users.put("/profile/edit/:id", async (req, res) => {
   return res.status(200).json(updateData.$set);
 });
 
-Users.get("/profile/:id", async (req, res) => {
+router.get("/profile/:id", async (req, res) => {
   const { id } = req.params;
   const dataProfil = await User.find({ userId: id });
   const data = dataProfil.map((data) => {
@@ -108,4 +104,4 @@ Users.get("/profile/:id", async (req, res) => {
   res.json(data);
 });
 
-module.exports = Users;
+module.exports = router;
