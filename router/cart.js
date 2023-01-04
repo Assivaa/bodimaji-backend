@@ -14,8 +14,8 @@ router.get("/cart/:id", async (req, res) => {
 
 router.put("/cart/:id", async (req, res) => {
   try {
-    const cart = await Cart.findById(req.params.id);
-    if (cart.userId === req.body._id && cart.username === req.body.username) {
+    const username = req.params.id;
+    if (username === req.body.username) {
       try {
         const updatedCart = await Cart.updateOne(
           { "collections.collectionId": req.body.collectionId },
