@@ -18,8 +18,8 @@ router.put("/cart/:id", async (req, res) => {
     if (username === req.body.username) {
       try {
         const updatedCart = await Cart.updateOne(
-          { "collections.collectionId": req.body.collectionId },
-          { $set: { "collections.$.quantity": req.body.quantity } }
+          { "products.productId": req.body.productId },
+          { $set: { "products.$.quantity": req.body.quantity } }
         );
         res.status(200).json(updatedCart);
       } catch (err) {

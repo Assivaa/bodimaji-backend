@@ -1,9 +1,9 @@
-const collection = require("./collection");
+const product = require("./product");
 const article = require("./article");
 const users = require("./users");
 const cart = require("./cart");
 module.exports = {
-  collection,
+  product,
   article,
   users,
   cart,

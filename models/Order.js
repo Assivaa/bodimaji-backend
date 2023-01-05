@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
       product: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "Collection",
+        ref: "Product",
       },
       shippingAddress: {
         address: { type: String, required: true },
