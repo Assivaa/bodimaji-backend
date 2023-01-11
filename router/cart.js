@@ -5,10 +5,10 @@ const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
 //get cart by user id
-router.get("/cart", async (req, res) => {
-  const user = req.body._id;
+router.get("/cart/:id", async (req, res) => {
+  const user = req.params.id;
   try {
-    const cart = await Cart.findOne({ user });
+    const cart = await Cart.findOne({ owner: user });
     if (cart && cart.products.length > 0) {
       res.status(200).send(cart);
     } else {
@@ -81,7 +81,7 @@ router.put("/cart", async (req, res) => {
 
 //post to cart (when clicking add to cart)
 router.post("/cart", async (req, res) => {
-  const owner = req.body._id;
+  const owner = req.body.owner;
   const quantity = req.body.quantity;
   const productId = mongoose.Types.ObjectId(req.body.productId);
 

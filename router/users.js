@@ -49,10 +49,10 @@ Users.post("/login", (req, res) => {
           });
           res.json({
             message: `${user.email} login succesfully`,
-            name: user.name,
+            fullname: user.fullname,
             username: user.username,
             email: user.email,
-            userId: user.userId,
+            userId: user._id,
             token,
           });
         } else {
